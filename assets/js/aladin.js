@@ -1,4 +1,9 @@
 
+function othername() {
+    var input = document.getElementById("userInput").value;
+    alert(input);
+}
+
 // Get siderealtime
 var timezone = -4;
 var longitude = -123.36;
