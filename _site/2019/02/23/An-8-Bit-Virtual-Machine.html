@@ -1,0 +1,271 @@
+<!doctype html>
+
+<!--
+	Hey there, thanks for peeking under the hood! This website is my website based off a template from HTML5 Up.
+-->
+
+
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Nat Comeau</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<noscript><link rel="stylesheet" href="/assets/css/noscript.css" /></noscript>
+	</head>
+	<body>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+            <nav>
+							<ul>
+                <li><a href="/index.html">Home</a></li>
+								<li><a href="/index.html#about">About/CV</a></li>
+								<li><a href="/index.html#projects">Projects</a></li>
+								<li><a href="/index.html#research">Research</a></li>
+								<li><a href="/pages/blog.html">Blog</a></li>
+								<li><a href="mailto:natstronaut.comeau@gmail.com">Contact</a></li>
+							</ul>
+						</nav>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Content -->
+						<h1> An 8-bit Virtual Architecture </h1>
+
+<p>I decided it might be fun to build a virtual architecture to calculate fibonacci numbers. I’m pretty excited about it; I’ve always wondered how hard it could be to design your own architecture entirely from scratch.</p>
+
+<h2 id="implentation-in-a-high-level-language">Implentation in a high level language</h2>
+<p>Basically, the first thing I started with was implementing fibonacci in C. Easy enough, right?</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+</span>
+<span class="kt">int</span> <span class="n">fib</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">){</span>
+	<span class="cm">/* Calculate the nth fibonaci number */</span>
+	<span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">tmp</span><span class="p">;</span>
+	<span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">==</span><span class="mi">1</span> <span class="o">||</span> <span class="n">n</span><span class="o">==</span><span class="mi">2</span><span class="p">)</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+		<span class="n">tmp</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
+		<span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">;</span>
+		<span class="n">a</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+
+<span class="kt">int</span> <span class="n">main</span><span class="p">(){</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Fib number %d is %d.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">fib</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="p">}</span>
+</code></pre></div></div>
+<h2 id="translation-to-assembly">Translation to Assembly</h2>
+<p>I then discovered the wonderful gcc flag -S, to spit out assembly. This means we can generate assembly with <code class="highlighter-rouge">gcc fib.c -S</code>. Super cool right!</p>
+
+<p>This spit out a fib.s file that looks like:</p>
+
+<pre><code class="language-x86">	.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 10, 14
+	.globl	_fib                    ## -- Begin function fib
+	.p2align	4, 0x90
+_fib:                                   ## @fib
+	.cfi_startproc
+## %bb.0:
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register %rbp
+	movl	%edi, -8(%rbp)
+	movl	$1, -12(%rbp)
+	movl	$1, -16(%rbp)
+	cmpl	$1, -8(%rbp)
+	je	LBB0_2
+## %bb.1:
+	cmpl	$2, -8(%rbp)
+	jne	LBB0_3
+LBB0_2:
+	movl	$1, -4(%rbp)
+	jmp	LBB0_8
+LBB0_3:
+	movl	$2, -20(%rbp)
+LBB0_4:                                 ## =&gt;This Inner Loop Header: Depth=1
+	movl	-20(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	jge	LBB0_7
+## %bb.5:                               ##   in Loop: Header=BB0_4 Depth=1
+	movl	-16(%rbp), %eax
+	movl	%eax, -24(%rbp)
+	movl	-12(%rbp), %eax
+	addl	-16(%rbp), %eax
+	movl	%eax, -16(%rbp)
+	movl	-24(%rbp), %eax
+	movl	%eax, -12(%rbp)
+## %bb.6:                               ##   in Loop: Header=BB0_4 Depth=1
+	movl	-20(%rbp), %eax
+	addl	$1, %eax
+	movl	%eax, -20(%rbp)
+	jmp	LBB0_4
+LBB0_7:
+	movl	-16(%rbp), %eax
+	movl	%eax, -4(%rbp)
+LBB0_8:
+	movl	-4(%rbp), %eax
+	popq	%rbp
+	retq
+	.cfi_endproc
+                                        ## -- End function
+	.globl	_main                   ## -- Begin function main
+	.p2align	4, 0x90
+_main:                                  ## @main
+	.cfi_startproc
+## %bb.0:
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register %rbp
+	subq	$16, %rsp
+	movl	$0, -4(%rbp)
+	movl	$1, -8(%rbp)
+LBB1_1:                                 ## =&gt;This Inner Loop Header: Depth=1
+	cmpl	$10, -8(%rbp)
+	jge	LBB1_4
+## %bb.2:                               ##   in Loop: Header=BB1_1 Depth=1
+	movl	-8(%rbp), %esi
+	movl	-8(%rbp), %edi
+	movl	%esi, -12(%rbp)         ## 4-byte Spill
+	callq	_fib
+	leaq	L_.str(%rip), %rdi
+	movl	-12(%rbp), %esi         ## 4-byte Reload
+	movl	%eax, %edx
+	movb	$0, %al
+	callq	_printf
+	movl	%eax, -16(%rbp)         ## 4-byte Spill
+## %bb.3:                               ##   in Loop: Header=BB1_1 Depth=1
+	movl	-8(%rbp), %eax
+	addl	$1, %eax
+	movl	%eax, -8(%rbp)
+	jmp	LBB1_1
+LBB1_4:
+	xorl	%eax, %eax
+	addq	$16, %rsp
+	popq	%rbp
+	retq
+	.cfi_endproc
+                                        ## -- End function
+	.section	__TEXT,__cstring,cstring_literals
+L_.str:                                 ## @.str
+	.asciz	"Fib number %d is %d.\n"
+
+
+.subsections_via_symbols
+</code></pre>
+
+<p>Now, I have no idea how to read x86 at this point. I tried to compile to something friendlier like MIPS or AVR assembly but that might have to wait. Cross compilation looks scary!</p>
+
+<h2 id="my-instruction-set-architecture">My Instruction Set Architecture</h2>
+
+<p>I’m having a really hard time designing an ISA for an 8-bit system. What gave me a really hard time is the beq instruction and the add instruction. I’m giving it a whirl with two bits for the opcode and 6 bits for the operands for now.</p>
+
+<p>I have a lot more respect for folks who programmed 8-bit processors.</p>
+
+<pre><code class="language-ASM">		// r0: a, r1: b, r2: tmp, r3:n
+
+
+		ldi r3, n // int n = n
+		ldi r0, 1 // int a = 1
+		ldi r1, 1 // int b = 1
+		ldi r2, 1 // int tmp = 1
+
+		cmp r2, r3 // tmp == n == 1?
+		bze RETURN_1
+
+		ldi r2, 2 // tmp = 2
+		cmp r2, r3 // tmp == n == 2?
+		bze RETURN_2
+
+		ldi r2, -2
+		add r2, n  // n = n - 2
+
+LOOP:   ldi r2, 0
+		add r2, r2, r1  // tmp = b
+		add r1, r0, r1
+		ldi a, 0
+		add r0, r0, r2  // a = tmp
+		ldi r2, -1		
+		add r3, r3, r2// Decrement n
+		ldi r2, 0
+		cmp r3, r2
+		bze DONE
+		cmp r3, r3
+		bze LOOP     // Get around not having BNEQ :')
+
+
+RETURN_1:ldi r3, 1
+		cmp r2, r2
+		bze DONE
+
+RETURN_2:ldi r3, 2
+		cmp r2, r2
+		bze DONE
+
+
+RETURN_B:ldi r3, 0
+		add r3, r1, r3 // Return result in reg n was passed in in
+		cmp r2, r2
+		bze DONE
+
+DONE:	
+
+
+</code></pre>
+
+<p>The hard thing is the add instruction needs three (it doesn’t actually, can you see why?) instructions so that takes up six bits. Therefore we’re limited to 2 bits for the opcode and 2 bits for each of the registers. However, by being clever with ldi (ldi is fantastic!!) and branches I believe I might have some workable assembly.</p>
+
+<p>My first draft ISA is therefore:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-LDI &lt;destination register&gt;, &lt;4 bit immediate&gt;
+-CMP &lt;register A&gt;, &lt;register B&gt; (Sets zero flag on ALU)
+-BZE &lt;immediate address offset&gt; (PC = PC + offset if ALU[zero])
+-ADD &lt;destination register&gt;, &lt;register A&gt;, &lt;register B&gt; (dest = A + B)
+
+</code></pre></div></div>
+
+<p>Four instructions for fibonnaci, not bad!!</p>
+
+
+
+
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<p class="copyright">&copy; 2019 Nat Comeau</p>
+					</footer>
+
+			</div>
+
+		<!-- BG -->
+			<div id="bg"></div>
+
+		<!-- Scripts -->
+
+	</body>
+</html>

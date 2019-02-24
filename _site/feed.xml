@@ -1,7 +1,205 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-01-29T21:57:29-08:00</updated><id>http://localhost:4000/feed.xml</id><entry><title type="html">Children of time</title><link href="http://localhost:4000/2018/12/20/Children-of-Time.html" rel="alternate" type="text/html" title="Children of time" /><published>2018-12-20T00:00:00-08:00</published><updated>2018-12-20T00:00:00-08:00</updated><id>http://localhost:4000/2018/12/20/Children%20of%20Time</id><content type="html" xml:base="http://localhost:4000/2018/12/20/Children-of-Time.html">&lt;p&gt;Few epics tell the story of an entire civilization better than Children of Time.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-23T18:28:57-08:00</updated><id>http://localhost:4000/feed.xml</id><entry><title type="html">An 8-bit Virtual Architecture</title><link href="http://localhost:4000/2019/02/23/An-8-Bit-Virtual-Machine.html" rel="alternate" type="text/html" title="An 8-bit Virtual Architecture" /><published>2019-02-23T00:00:00-08:00</published><updated>2019-02-23T00:00:00-08:00</updated><id>http://localhost:4000/2019/02/23/An%208-Bit%20Virtual%20Machine</id><content type="html" xml:base="http://localhost:4000/2019/02/23/An-8-Bit-Virtual-Machine.html">&lt;p&gt;I decided it might be fun to build a virtual architecture to calculate fibonacci numbers. I’m pretty excited about it; I’ve always wondered how hard it could be to design your own architecture entirely from scratch.&lt;/p&gt;
 
-&lt;p&gt;The smash hit is currently being made into a movie.&lt;/p&gt;</content><author><name>nat</name></author><summary type="html">Few epics tell the story of an entire civilization better than Children of Time.</summary></entry><entry><title type="html">Red mars</title><link href="http://localhost:4000/2018/08/22/Red-Mars.html" rel="alternate" type="text/html" title="Red mars" /><published>2018-08-22T00:00:00-07:00</published><updated>2018-08-22T00:00:00-07:00</updated><id>http://localhost:4000/2018/08/22/Red%20Mars</id><content type="html" xml:base="http://localhost:4000/2018/08/22/Red-Mars.html">&lt;p&gt;Red Mars and the other two books of the Mars Trilogy can be seen as a classic blueprint to colonizing the red planet.&lt;/p&gt;
+&lt;h2 id=&quot;implentation-in-a-high-level-language&quot;&gt;Implentation in a high level language&lt;/h2&gt;
+&lt;p&gt;Basically, the first thing I started with was implementing fibonacci in C. Easy enough, right?&lt;/p&gt;
 
-&lt;p&gt;Want to know how to colonize mars? This is a classic must read on the subject.&lt;/p&gt;</content><author><name>nat</name></author><summary type="html">Red Mars and the other two books of the Mars Trilogy can be seen as a classic blueprint to colonizing the red planet.</summary></entry><entry><title type="html">Foundation</title><link href="http://localhost:4000/2018/08/21/Foundation.html" rel="alternate" type="text/html" title="Foundation" /><published>2018-08-21T00:00:00-07:00</published><updated>2018-08-21T00:00:00-07:00</updated><id>http://localhost:4000/2018/08/21/Foundation</id><content type="html" xml:base="http://localhost:4000/2018/08/21/Foundation.html">&lt;p&gt;The Classic&lt;/p&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;stdio.h&amp;gt;
+#include &amp;lt;stdlib.h&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+	&lt;span class=&quot;cm&quot;&gt;/* Calculate the nth fibonaci number */&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-&lt;p&gt;An absolute classic from beginning to end.&lt;/p&gt;</content><author><name>ted</name></author><summary type="html">The Classic</summary></entry></feed>
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Fib number %d is %d.&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h2 id=&quot;translation-to-assembly&quot;&gt;Translation to Assembly&lt;/h2&gt;
+&lt;p&gt;I then discovered the wonderful gcc flag -S, to spit out assembly. This means we can generate assembly with &lt;code class=&quot;highlighter-rouge&quot;&gt;gcc fib.c -S&lt;/code&gt;. Super cool right!&lt;/p&gt;
+
+&lt;p&gt;This spit out a fib.s file that looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-x86&quot;&gt;	.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 10, 14
+	.globl	_fib                    ## -- Begin function fib
+	.p2align	4, 0x90
+_fib:                                   ## @fib
+	.cfi_startproc
+## %bb.0:
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register %rbp
+	movl	%edi, -8(%rbp)
+	movl	$1, -12(%rbp)
+	movl	$1, -16(%rbp)
+	cmpl	$1, -8(%rbp)
+	je	LBB0_2
+## %bb.1:
+	cmpl	$2, -8(%rbp)
+	jne	LBB0_3
+LBB0_2:
+	movl	$1, -4(%rbp)
+	jmp	LBB0_8
+LBB0_3:
+	movl	$2, -20(%rbp)
+LBB0_4:                                 ## =&amp;gt;This Inner Loop Header: Depth=1
+	movl	-20(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	jge	LBB0_7
+## %bb.5:                               ##   in Loop: Header=BB0_4 Depth=1
+	movl	-16(%rbp), %eax
+	movl	%eax, -24(%rbp)
+	movl	-12(%rbp), %eax
+	addl	-16(%rbp), %eax
+	movl	%eax, -16(%rbp)
+	movl	-24(%rbp), %eax
+	movl	%eax, -12(%rbp)
+## %bb.6:                               ##   in Loop: Header=BB0_4 Depth=1
+	movl	-20(%rbp), %eax
+	addl	$1, %eax
+	movl	%eax, -20(%rbp)
+	jmp	LBB0_4
+LBB0_7:
+	movl	-16(%rbp), %eax
+	movl	%eax, -4(%rbp)
+LBB0_8:
+	movl	-4(%rbp), %eax
+	popq	%rbp
+	retq
+	.cfi_endproc
+                                        ## -- End function
+	.globl	_main                   ## -- Begin function main
+	.p2align	4, 0x90
+_main:                                  ## @main
+	.cfi_startproc
+## %bb.0:
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbp, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register %rbp
+	subq	$16, %rsp
+	movl	$0, -4(%rbp)
+	movl	$1, -8(%rbp)
+LBB1_1:                                 ## =&amp;gt;This Inner Loop Header: Depth=1
+	cmpl	$10, -8(%rbp)
+	jge	LBB1_4
+## %bb.2:                               ##   in Loop: Header=BB1_1 Depth=1
+	movl	-8(%rbp), %esi
+	movl	-8(%rbp), %edi
+	movl	%esi, -12(%rbp)         ## 4-byte Spill
+	callq	_fib
+	leaq	L_.str(%rip), %rdi
+	movl	-12(%rbp), %esi         ## 4-byte Reload
+	movl	%eax, %edx
+	movb	$0, %al
+	callq	_printf
+	movl	%eax, -16(%rbp)         ## 4-byte Spill
+## %bb.3:                               ##   in Loop: Header=BB1_1 Depth=1
+	movl	-8(%rbp), %eax
+	addl	$1, %eax
+	movl	%eax, -8(%rbp)
+	jmp	LBB1_1
+LBB1_4:
+	xorl	%eax, %eax
+	addq	$16, %rsp
+	popq	%rbp
+	retq
+	.cfi_endproc
+                                        ## -- End function
+	.section	__TEXT,__cstring,cstring_literals
+L_.str:                                 ## @.str
+	.asciz	&quot;Fib number %d is %d.\n&quot;
+
+
+.subsections_via_symbols
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, I have no idea how to read x86 at this point. I tried to compile to something friendlier like MIPS or AVR assembly but that might have to wait. Cross compilation looks scary!&lt;/p&gt;
+
+&lt;h2 id=&quot;my-instruction-set-architecture&quot;&gt;My Instruction Set Architecture&lt;/h2&gt;
+
+&lt;p&gt;I’m having a really hard time designing an ISA for an 8-bit system. What gave me a really hard time is the beq instruction and the add instruction. I’m giving it a whirl with two bits for the opcode and 6 bits for the operands for now.&lt;/p&gt;
+
+&lt;p&gt;I have a lot more respect for folks who programmed 8-bit processors.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ASM&quot;&gt;		// r0: a, r1: b, r2: tmp, r3:n
+
+
+		ldi r3, n // int n = n
+		ldi r0, 1 // int a = 1
+		ldi r1, 1 // int b = 1
+		ldi r2, 1 // int tmp = 1
+
+		cmp r2, r3 // tmp == n == 1?
+		bze RETURN_1
+
+		ldi r2, 2 // tmp = 2
+		cmp r2, r3 // tmp == n == 2?
+		bze RETURN_2
+
+		ldi r2, -2
+		add r2, n  // n = n - 2
+
+LOOP:   ldi r2, 0
+		add r2, r2, r1  // tmp = b
+		add r1, r0, r1
+		ldi a, 0
+		add r0, r0, r2  // a = tmp
+		ldi r2, -1		
+		add r3, r3, r2// Decrement n
+		ldi r2, 0
+		cmp r3, r2
+		bze DONE
+		cmp r3, r3
+		bze LOOP     // Get around not having BNEQ :')
+
+
+RETURN_1:ldi r3, 1
+		cmp r2, r2
+		bze DONE
+
+RETURN_2:ldi r3, 2
+		cmp r2, r2
+		bze DONE
+
+
+RETURN_B:ldi r3, 0
+		add r3, r1, r3 // Return result in reg n was passed in in
+		cmp r2, r2
+		bze DONE
+
+DONE:	
+
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The hard thing is the add instruction needs three (it doesn’t actually, can you see why?) instructions so that takes up six bits. Therefore we’re limited to 2 bits for the opcode and 2 bits for each of the registers. However, by being clever with ldi (ldi is fantastic!!) and branches I believe I might have some workable assembly.&lt;/p&gt;
+
+&lt;p&gt;My first draft ISA is therefore:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-LDI &amp;lt;destination register&amp;gt;, &amp;lt;4 bit immediate&amp;gt;
+-CMP &amp;lt;register A&amp;gt;, &amp;lt;register B&amp;gt; (Sets zero flag on ALU)
+-BZE &amp;lt;immediate address offset&amp;gt; (PC = PC + offset if ALU[zero])
+-ADD &amp;lt;destination register&amp;gt;, &amp;lt;register A&amp;gt;, &amp;lt;register B&amp;gt; (dest = A + B)
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Four instructions for fibonnaci, not bad!!&lt;/p&gt;</content><author><name></name></author><summary type="html">I decided it might be fun to build a virtual architecture to calculate fibonacci numbers. I’m pretty excited about it; I’ve always wondered how hard it could be to design your own architecture entirely from scratch.</summary></entry></feed>

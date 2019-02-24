@@ -1,62 +1,15 @@
-<!DOCTYPE HTML>
+---
+layout: default
+---
 
-<!--
-	Hey there, thanks for peeking under the hood! This website is my website based off a template from HTML5 Up.
--->
+<h1 name="first">Latest Posts</h1>
+<ul>
+  {% for post in site.posts %}
+    <li>
+      <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+      <p>{{ post.excerpt }}</p>
+    </li>
+  {% endfor %}
+</ul>
 
 
-<!--
-	Dimension by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>Nat Comeau</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="../assets/css/main.css" />
-		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
-		<noscript><link rel="stylesheet" href="/assets/css/noscript.css" /></noscript>
-	</head>
-	<body>
-
-		<!-- Wrapper -->
-			<div id="wrapper">
-
-				<!-- Header -->
-					<header id="header">
-            <nav>
-							<ul>
-                <li><a href="../index.html">Home</a></li>
-								<li><a href="#about">About/CV</a></li>
-								<li><a href="#projects">Projects</a></li>
-								<li><a href="#research">Research</a></li>
-								<li><a href="pages/firstpage.html">Blog</a></li>
-								<li><a href="mailto:natstronaut.comeau@gmail.com">Contact</a></li>
-							</ul>
-						</nav>
-					</header>
-
-				<!-- Main -->
-					<div id="main">
-
-						<!-- Intro -->
-						<h1 name="first">Coming Soon!</h1>
-
-					</div>
-
-				<!-- Footer -->
-					<footer id="footer">
-						<p class="copyright">&copy; 2019 Nat Comeau</p>
-					</footer>
-
-			</div>
-
-		<!-- BG -->
-			<div id="bg"></div>
-
-		<!-- Scripts -->
-
-	</body>
-</html>
