@@ -1,0 +1,540 @@
+<!doctype html>
+
+<!--
+	Hey there, thanks for peeking under the hood! This website is my website based off a template from HTML5 Up.
+-->
+
+
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Nat Comeau</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<noscript><link rel="stylesheet" href="/assets/css/noscript.css" /></noscript>
+	</head>
+	<body>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+            <nav>
+							<ul>
+                <li><a href="/index.html">Home</a></li>
+								<li><a href="/index.html#about">About/CV</a></li>
+								<li><a href="/index.html#projects">Projects</a></li>
+								<li><a href="/index.html#research">Research</a></li>
+								<li><a href="/pages/blog.html">Blog</a></li>
+								<li><a href="mailto:natstronaut.comeau@gmail.com">Contact</a></li>
+							</ul>
+						</nav>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Content -->
+						<h1> Lampserver </h1>
+
+<p>The idea: how could I establish a cloud database and build an android application to write data to that server?</p>
+
+<h2 id="part-1-deploying-a-lamp-web-server-with-crud-abilities">Part 1: Deploying a LAMP Web Server with CRUD abilities.</h2>
+
+<p>This made extensive use of AWS EC2 and Docker.</p>
+
+<h2 id="set-up-lamp-server-using-ec2">Set up LAMP Server using EC2</h2>
+
+<p>My first step was to set up a LAMP web server using Amazon EC2.</p>
+
+<p>I found <a href="https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-ubuntu-18-04">this digital ocean guide</a> extremely useful.</p>
+
+<p>I then made the effort to dockerize my setup (because I don’t think I can afford to run an EC2 instance all the time and needed to be able to launch quickly).</p>
+
+<p>First I figured installed docker and docker compose on my ec2 instance with help from the <a href="https://docs.docker.com/install/linux/docker-ce/ubuntu/">docker documentation</a>.</p>
+
+<p><em>Note that we might have to change the version number of docker-compose in the curl command below. Find the latest version number by going to the <a href="https://github.com/docker/compose/releases">release page</a> on Github.</em></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get remove docker docker-engine docker.io containerd runc
+<span class="nb">sudo </span>apt-get update
+<span class="nb">sudo </span>apt-get install <span class="se">\</span>
+    apt-transport-https <span class="se">\</span>
+    ca-certificates <span class="se">\</span>
+    curl <span class="se">\</span>
+    gnupg-agent <span class="se">\</span>
+    software-properties-common
+curl <span class="nt">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg | <span class="nb">sudo </span>apt-key add -
+<span class="nb">sudo </span>apt-key fingerprint 0EBFCD88
+<span class="nb">sudo </span>add-apt-repository <span class="se">\</span>
+   <span class="s2">"deb [arch=amd64] https://download.docker.com/linux/ubuntu </span><span class="se">\</span><span class="s2">
+   </span><span class="k">$(</span>lsb_release <span class="nt">-cs</span><span class="k">)</span><span class="s2"> </span><span class="se">\</span><span class="s2">
+   stable"</span>
+<span class="nb">sudo </span>apt-get update
+<span class="nb">sudo </span>apt-get install docker-ce docker-ce-cli containerd.io
+<span class="nb">sudo </span>docker run hello-world
+<span class="nb">sudo </span>curl <span class="nt">-L</span> https://github.com/docker/compose/releases/download/1.24.0-rc1/docker-compose-<span class="sb">`</span>uname <span class="nt">-s</span><span class="sb">`</span>-<span class="sb">`</span>uname <span class="nt">-m</span><span class="sb">`</span> <span class="nt">-o</span> /usr/local/bin/docker-compose
+<span class="nb">sudo </span>chmod +x /usr/local/bin/docker-compose
+</code></pre></div></div>
+
+<p>I then started building a docker LAMP image, just to learn how it’s done. This <a href="https://www.kinamo.be/en/support/faq/setting-up-a-development-environment-with-docker-compose">kinamo</a> guide was super helpful.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir php
+<span class="nb">cd </span>php
+<span class="nb">echo</span> <span class="s2">"FROM php:5.6-apache
+
+RUN docker-php-ext-install mysqli"</span> <span class="o">&gt;</span> Dockerfile
+
+mkdir www
+<span class="nb">cd </span>www
+<span class="nb">echo</span> <span class="s2">"&lt;?php
+phpinfo();
+?&gt;"</span> <span class="o">&gt;</span> index.php
+
+<span class="nb">cd</span> ../../
+
+<span class="nb">echo</span> <span class="s2">"version: '2'
+
+services:
+  php:
+    build: php
+    ports:
+      - "</span>80:80<span class="s2">"
+      - "</span>443:443<span class="s2">"
+    volumes:
+      - ./php/www:/var/www/html
+    links:
+      - db
+  db:
+    image: mysql:5.7
+    volumes:
+     - /var/lib/mysql
+    environment:
+     - MYSQL_ROOT_PASSWORD=thisismypassword
+     - MYSQL_DATABASE=culturemind
+
+      "</span> <span class="o">&gt;</span> docker-compose.yml
+
+<span class="nb">echo</span> <span class="s2">"&lt;?php
+
+mysqli_connect(</span><span class="se">\"</span><span class="s2">db</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">root</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">thisismypassword</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">culturemind</span><span class="se">\"</span><span class="s2">) or die(mysqli_error());
+echo </span><span class="se">\"</span><span class="s2">Connected to MySQL&lt;br /&gt;</span><span class="se">\"</span><span class="s2">;
+
+?&gt;"</span> <span class="o">&gt;</span> php/www/index.php
+
+<span class="nb">sudo </span>docker-compose up <span class="nt">-d</span>
+
+</code></pre></div></div>
+
+<p>You should now have a dockerized LAMP server up and running!</p>
+
+<h2 id="create-a-basic-database">Create a Basic Database</h2>
+
+<p>I found some inspiration from <a href="http://www.androidhive.info/2012/05/how-to-connect-android-with-php-mysql/">here</a>.</p>
+
+<p>First we write some php to create the table. We’ll use a connection class to connect to the database.</p>
+
+<p>Place the contents of the following in php/www/db_config.php on the host machine.</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+ 
+<span class="cm">/*
+ * All database connection variables
+ */</span>
+ 
+<span class="nb">define</span><span class="p">(</span><span class="s1">'DB_USER'</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">);</span> <span class="c1">// db user
+</span><span class="nb">define</span><span class="p">(</span><span class="s1">'DB_PASSWORD'</span><span class="p">,</span> <span class="s2">"thisismypassword"</span><span class="p">);</span> <span class="c1">// db password (mention your db password here)
+</span><span class="nb">define</span><span class="p">(</span><span class="s1">'DB_DATABASE'</span><span class="p">,</span> <span class="s2">"culturemind"</span><span class="p">);</span> <span class="c1">// database name
+</span><span class="nb">define</span><span class="p">(</span><span class="s1">'DB_SERVER'</span><span class="p">,</span> <span class="s2">"db"</span><span class="p">);</span> <span class="c1">// db server
+</span><span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Now we’ll try to create the table. Place the following in php/www/table_create.php</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+
+<span class="c1">// Create the initial table in our database
+</span>
+<span class="c1">// array for JSON response
+</span><span class="nv">$response</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+
+<span class="k">require_once</span> <span class="nx">__DIR__</span> <span class="o">.</span> <span class="s1">'/db_config.php'</span><span class="p">;</span>
+
+<span class="c1">// Create connection
+</span><span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysqli_connect</span><span class="p">(</span><span class="nx">DB_SERVER</span><span class="p">,</span> <span class="nx">DB_USER</span><span class="p">,</span> <span class="nx">DB_PASSWORD</span><span class="p">,</span> <span class="nx">DB_DATABASE</span><span class="p">);</span>
+<span class="c1">// Check connection
+</span><span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">die</span><span class="p">(</span><span class="s2">"Connection failed: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// sql to create table
+</span><span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"CREATE TABLE data(
+pid int(11) primary key auto_increment,
+name varchar(100) not null,
+price decimal(10,2) not null,
+description text,
+created_at timestamp default now(),
+updated_at timestamp default now()
+)"</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$sql</span><span class="p">)</span> <span class="o">===</span> <span class="k">TRUE</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s2">"Table data created successfully"</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s2">"Error creating table: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">error</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">mysqli_close</span><span class="p">(</span><span class="nv">$link</span><span class="p">);</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Now to add rows to the table. Add the following to php/www/create_product.php</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+
+<span class="cm">/*
+ * Following code will create a new product row
+ * All product details are read from HTTP Post Request
+ */</span>
+
+<span class="c1">// array for JSON response
+</span><span class="nv">$response</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+
+<span class="c1">// check for required fields
+</span><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'price'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]))</span> <span class="p">{</span>
+
+    <span class="nv">$name</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">];</span>
+    <span class="nv">$price</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'price'</span><span class="p">];</span>
+    <span class="nv">$description</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'description'</span><span class="p">];</span>
+
+    <span class="c1">// include db connect class
+</span>    <span class="k">require_once</span> <span class="nx">__DIR__</span> <span class="o">.</span> <span class="s1">'/db_config.php'</span><span class="p">;</span>
+
+    <span class="c1">// connecting to db
+</span>    <span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysqli_connect</span><span class="p">(</span><span class="nx">DB_SERVER</span><span class="p">,</span> <span class="nx">DB_USER</span><span class="p">,</span> <span class="nx">DB_PASSWORD</span><span class="p">,</span> <span class="nx">DB_DATABASE</span><span class="p">);</span>
+        <span class="c1">// Check connection
+</span>        <span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">die</span><span class="p">(</span><span class="s2">"Connection failed: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"INSERT INTO data(name, price, description) VALUES('</span><span class="nv">$name</span><span class="s2">', '</span><span class="nv">$price</span><span class="s2">', '</span><span class="nv">$description</span><span class="s2">')"</span><span class="p">;</span>
+
+    <span class="c1">// mysql inserting a new row
+</span>    <span class="c1">// check if row inserted or not
+</span>    <span class="k">if</span> <span class="p">((</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">query</span><span class="p">(</span><span class="nv">$sql</span><span class="p">))</span> <span class="o">===</span> <span class="k">TRUE</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// successfully inserted into database
+</span>        <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Product successfully created."</span><span class="p">;</span>
+
+        <span class="c1">// echoing JSON response
+</span>        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// failed to insert row
+</span>        <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Oops! An error occurred."</span><span class="p">;</span>
+
+        <span class="c1">// echoing JSON response
+</span>        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// required field is missing
+</span>    <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Required field(s) is missing"</span><span class="p">;</span>
+
+    <span class="c1">// echoing JSON response
+</span>    <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Now we’ll get product details. Add the following to php/www/get_product_details.php</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+ 
+<span class="cm">/*
+ * Following code will get single product details
+ * A product is identified by product id (pid)
+ */</span>
+ 
+<span class="c1">// array for JSON response
+</span><span class="nv">$response</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+ 
+<span class="c1">// include db connect class
+</span><span class="k">require_once</span> <span class="nx">__DIR__</span> <span class="o">.</span> <span class="s1">'/db_config.php'</span><span class="p">;</span>
+ 
+<span class="c1">// connecting to db
+</span><span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysqli_connect</span><span class="p">(</span><span class="nx">DB_SERVER</span><span class="p">,</span> <span class="nx">DB_USER</span><span class="p">,</span> <span class="nx">DB_PASSWORD</span><span class="p">,</span> <span class="nx">DB_DATABASE</span><span class="p">);</span>
+<span class="c1">// Check connection
+</span><span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">die</span><span class="p">(</span><span class="s2">"Connection failed: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+<span class="p">}</span>
+ 
+<span class="c1">// check for post data
+</span><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"pid"</span><span class="p">]))</span> <span class="p">{</span>
+    <span class="nv">$pid</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">];</span>
+ 
+    <span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"SELECT *FROM products WHERE pid = </span><span class="nv">$pid</span><span class="s2">"</span><span class="p">;</span>
+
+    <span class="c1">// get a product from products table
+</span> 	<span class="nv">$result</span> <span class="o">=</span> <span class="nx">mysqli_query</span><span class="p">(</span><span class="nv">$link</span><span class="p">,</span> <span class="nv">$sql</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$result</span><span class="p">))</span> <span class="p">{</span>
+        <span class="c1">// check for empty result
+</span>        <span class="k">if</span> <span class="p">(</span><span class="nx">mysqli_num_rows</span><span class="p">(</span><span class="nv">$result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+ 
+            <span class="nv">$result</span> <span class="o">=</span> <span class="nb">mysql_fetch_array</span><span class="p">(</span><span class="nv">$result</span><span class="p">);</span>
+ 
+            <span class="nv">$product</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+            <span class="nv">$product</span><span class="p">[</span><span class="s2">"pid"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$result</span><span class="p">[</span><span class="s2">"pid"</span><span class="p">];</span>
+            <span class="nv">$product</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">];</span>
+            <span class="nv">$product</span><span class="p">[</span><span class="s2">"price"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$result</span><span class="p">[</span><span class="s2">"price"</span><span class="p">];</span>
+            <span class="nv">$product</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$result</span><span class="p">[</span><span class="s2">"description"</span><span class="p">];</span>
+            <span class="nv">$product</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$result</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">];</span>
+            <span class="nv">$product</span><span class="p">[</span><span class="s2">"updated_at"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$result</span><span class="p">[</span><span class="s2">"updated_at"</span><span class="p">];</span>
+            <span class="c1">// success
+</span>            <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+ 
+            <span class="c1">// user node
+</span>            <span class="nv">$response</span><span class="p">[</span><span class="s2">"product"</span><span class="p">]</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+ 
+            <span class="nb">array_push</span><span class="p">(</span><span class="nv">$response</span><span class="p">[</span><span class="s2">"product"</span><span class="p">],</span> <span class="nv">$product</span><span class="p">);</span>
+ 
+            <span class="c1">// echoing JSON response
+</span>            <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// no product found
+</span>            <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"No product found"</span><span class="p">;</span>
+ 
+            <span class="c1">// echo no users JSON
+</span>            <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// no product found
+</span>        <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"No product found"</span><span class="p">;</span>
+ 
+        <span class="c1">// echo no users JSON
+</span>        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// required field is missing
+</span>    <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Required field(s) is missing"</span><span class="p">;</span>
+ 
+    <span class="c1">// echoing JSON response
+</span>    <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Let’s view all rows in the database. Add this to php/www/get_all_products.php.</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+ 
+<span class="cm">/*
+ * Following code will list all the products
+ */</span>
+ 
+<span class="c1">// array for JSON response
+</span><span class="nv">$response</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+ 
+<span class="c1">// include db connect class
+</span><span class="k">require_once</span> <span class="nx">__DIR__</span> <span class="o">.</span> <span class="s1">'/db_config.php'</span><span class="p">;</span>
+ 
+<span class="c1">// connecting to db
+</span><span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysqli_connect</span><span class="p">(</span><span class="nx">DB_SERVER</span><span class="p">,</span> <span class="nx">DB_USER</span><span class="p">,</span> <span class="nx">DB_PASSWORD</span><span class="p">,</span> <span class="nx">DB_DATABASE</span><span class="p">);</span>
+<span class="c1">// Check connection
+</span><span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">die</span><span class="p">(</span><span class="s2">"Connection failed: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+<span class="p">}</span>
+ 
+<span class="c1">// get all products from products table
+</span><span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"SELECT * FROM data"</span><span class="p">;</span>
+<span class="nv">$result</span> <span class="o">=</span> <span class="nx">mysqli_query</span><span class="p">(</span><span class="nv">$link</span><span class="p">,</span> <span class="nv">$sql</span><span class="p">);</span>
+<span class="k">echo</span> <span class="s2">"</span><span class="nv">$result</span><span class="s2">"</span><span class="p">;</span>
+ 
+<span class="c1">// check for empty result
+</span><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nx">result</span><span class="p">)){</span>
+	<span class="k">if</span> <span class="p">(</span><span class="nx">mysqli_num_rows</span><span class="p">(</span><span class="nv">$result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+	    <span class="c1">// looping through all results
+</span>	    <span class="c1">// products node
+</span>	    <span class="nv">$response</span><span class="p">[</span><span class="s2">"products"</span><span class="p">]</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+	 
+	    <span class="k">while</span> <span class="p">(</span><span class="nv">$row</span> <span class="o">=</span> <span class="nx">mysqli_fetch_array</span><span class="p">(</span><span class="nv">$result</span><span class="p">,</span> <span class="nx">MYSQLI_BOTH</span><span class="p">))</span> <span class="p">{</span>
+	        <span class="c1">// temp user array
+</span>	        <span class="nv">$product</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+	        <span class="nv">$product</span><span class="p">[</span><span class="s2">"pid"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$row</span><span class="p">[</span><span class="s2">"pid"</span><span class="p">];</span>
+	        <span class="nv">$product</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$row</span><span class="p">[</span><span class="s2">"name"</span><span class="p">];</span>
+	        <span class="nv">$product</span><span class="p">[</span><span class="s2">"price"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$row</span><span class="p">[</span><span class="s2">"price"</span><span class="p">];</span>
+	        <span class="nv">$product</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$row</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">];</span>
+	        <span class="nv">$product</span><span class="p">[</span><span class="s2">"updated_at"</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$row</span><span class="p">[</span><span class="s2">"updated_at"</span><span class="p">];</span>
+	 
+	        <span class="c1">// push single product into final response array
+</span>	        <span class="nb">array_push</span><span class="p">(</span><span class="nv">$response</span><span class="p">[</span><span class="s2">"products"</span><span class="p">],</span> <span class="nv">$product</span><span class="p">);</span>
+	    <span class="p">}</span>
+	    <span class="c1">// success
+</span>	    <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+	 
+	    <span class="c1">// echoing JSON response
+</span>	    <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+	    <span class="c1">// no products found
+</span>	    <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	    <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"No products found"</span><span class="p">;</span>
+	 
+	    <span class="c1">// echo no users JSON
+</span>	    <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+	<span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Database was empty."</span><span class="p">;</span>
+	<span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Let’s add code to update a product. Add this to php/www/update_product.php.</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+ 
+<span class="cm">/*
+ * Following code will update a product information
+ * A product is identified by product id (pid)
+ */</span>
+ 
+<span class="c1">// array for JSON response
+</span><span class="nv">$response</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+ 
+<span class="c1">// check for required fields
+</span><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'price'</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]))</span> <span class="p">{</span>
+ 
+    <span class="nv">$pid</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">];</span>
+    <span class="nv">$name</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'name'</span><span class="p">];</span>
+    <span class="nv">$price</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'price'</span><span class="p">];</span>
+    <span class="nv">$description</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'description'</span><span class="p">];</span>
+ 
+    <span class="c1">// include db connect class
+</span>	<span class="k">require_once</span> <span class="nx">__DIR__</span> <span class="o">.</span> <span class="s1">'/db_config.php'</span><span class="p">;</span>
+	 
+	<span class="c1">// connecting to db
+</span>	<span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysqli_connect</span><span class="p">(</span><span class="nx">DB_SERVER</span><span class="p">,</span> <span class="nx">DB_USER</span><span class="p">,</span> <span class="nx">DB_PASSWORD</span><span class="p">,</span> <span class="nx">DB_DATABASE</span><span class="p">);</span>
+	<span class="c1">// Check connection
+</span>	<span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">)</span> <span class="p">{</span>
+	    <span class="k">die</span><span class="p">(</span><span class="s2">"Connection failed: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"UPDATE data SET name = '</span><span class="nv">$name</span><span class="s2">', price = '</span><span class="nv">$price</span><span class="s2">', description = '</span><span class="nv">$description</span><span class="s2">' WHERE pid = </span><span class="nv">$pid</span><span class="s2">"</span><span class="p">;</span>
+ 
+    <span class="c1">// mysql update row with matched pid
+</span>    <span class="nv">$result</span> <span class="o">=</span> <span class="nx">mysqli_query</span><span class="p">(</span><span class="nv">$link</span><span class="p">,</span> <span class="nv">$sql</span><span class="p">);</span>
+ 
+    <span class="c1">// check if row inserted or not
+</span>    <span class="k">if</span> <span class="p">(</span><span class="nv">$result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// successfully updated
+</span>        <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Product successfully updated."</span><span class="p">;</span>
+ 
+        <span class="c1">// echoing JSON response
+</span>        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+ 		<span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Error updating row."</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// required field is missing
+</span>    <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Required field(s) is missing"</span><span class="p">;</span>
+ 
+    <span class="c1">// echoing JSON response
+</span>    <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Lastly, let’s set up a delete operation. Add the following to php/www/delete_product.php</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+ 
+<span class="cm">/*
+ * Following code will delete a product from table
+ * A product is identified by product id (pid)
+ */</span>
+ 
+<span class="c1">// array for JSON response
+</span><span class="nv">$response</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+ 
+<span class="c1">// check for required fields
+</span><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">]))</span> <span class="p">{</span>
+    <span class="nv">$pid</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">];</span>
+ 
+    <span class="c1">// include db connect class
+</span>	<span class="k">require_once</span> <span class="nx">__DIR__</span> <span class="o">.</span> <span class="s1">'/db_config.php'</span><span class="p">;</span>
+	 
+	<span class="c1">// connecting to db
+</span>	<span class="nv">$link</span> <span class="o">=</span> <span class="nb">mysqli_connect</span><span class="p">(</span><span class="nx">DB_SERVER</span><span class="p">,</span> <span class="nx">DB_USER</span><span class="p">,</span> <span class="nx">DB_PASSWORD</span><span class="p">,</span> <span class="nx">DB_DATABASE</span><span class="p">);</span>
+	<span class="c1">// Check connection
+</span>	<span class="k">if</span> <span class="p">(</span><span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">)</span> <span class="p">{</span>
+	    <span class="k">die</span><span class="p">(</span><span class="s2">"Connection failed: "</span> <span class="o">.</span> <span class="nv">$link</span><span class="o">-&gt;</span><span class="na">connect_error</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="nv">$sql</span> <span class="o">=</span> <span class="s2">"DELETE FROM data WHERE pid = </span><span class="nv">$pid</span><span class="s2">"</span><span class="p">;</span>
+ 
+    <span class="c1">// mysql update row with matched pid
+</span>    <span class="nv">$result</span> <span class="o">=</span> <span class="nx">mysqli_query</span><span class="p">(</span><span class="nv">$link</span><span class="p">,</span> <span class="nv">$sql</span><span class="p">);</span>
+ 
+    <span class="c1">// check if row deleted or not
+</span>    <span class="k">if</span> <span class="p">((</span><span class="nx">mysqli_affected_rows</span><span class="p">(</span><span class="nv">$link</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// successfully updated
+</span>        <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Product successfully deleted"</span><span class="p">;</span>
+ 
+        <span class="c1">// echoing JSON response
+</span>        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// no product found
+</span>        <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"No product found"</span><span class="p">;</span>
+ 
+        <span class="c1">// echo no users JSON
+</span>        <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// required field is missing
+</span>    <span class="nv">$response</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nv">$response</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Required field(s) is missing"</span><span class="p">;</span>
+ 
+    <span class="c1">// echoing JSON response
+</span>    <span class="k">echo</span> <span class="nb">json_encode</span><span class="p">(</span><span class="nv">$response</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>And our CRUD api is good to go! At this point I found it super useful to use <a href="https://www.getpostman.com">postman</a> to send POST and GET requests to help debugging.</p>
+
+<p>More coming soon!</p>
+
+
+
+
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<p class="copyright">&copy; 2019 Nat Comeau</p>
+					</footer>
+
+			</div>
+
+		<!-- BG -->
+			<div id="bg"></div>
+
+		<!-- Scripts -->
+
+	</body>
+</html>
